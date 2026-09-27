@@ -48,7 +48,7 @@ def _decimal_places(values, max_places=6):
 
 
 def summarize_nodes(nodes, group_col=None, top_n=5):
-    """Show summary tables and histograms of node attributes, overall or by group.
+    """Show summary tables, histograms and correlation matrices of node attributes, overall or by group.
 
     Parameters
     ----------
@@ -65,6 +65,8 @@ def summarize_nodes(nodes, group_col=None, top_n=5):
         With no grouping: "summary", one row per attribute in HIST_SETTINGS.
         With a grouping: "counts" (nodes per group) plus one summary stats table per
         column in TABLE_COLS, one row per group.
+        Both also include "correlations": the Spearman correlation matrix for each plotted
+        group, indexed by (group, attribute).
     """
     tables = {}
 
@@ -145,4 +147,54 @@ def summarize_nodes(nodes, group_col=None, top_n=5):
     plt.tight_layout()
     plt.show()
 
+    #Correlations between the histogram attributes, one matrix per group plotted above.
+    #Spearman (rank) correlation because the attributes are skewed and some only take a few values
+    tables["correlations"] = _plot_correlations(nodes, masks, by_text)
+
     return tables
+
+
+def _plot_correlations(nodes, masks, by_text, max_rows=1_000_000):
+    """Plot a Spearman correlation matrix of the HIST_SETTINGS attributes for each group.
+
+    Groups with more than max_rows nodes are randomly sampled down to max_rows, which keeps
+    ranking 13M+ rows fast and gives the same coefficients to within about 0.005.
+
+    Returns a DataFrame of all the matrices, indexed by (group, attribute).
+    """
+    cols = list(HIST_SETTINGS)
+    rng = np.random.default_rng(0)
+
+    #Up to 3 matrices per row so they stay readable
+    ncols = min(3, len(masks))
+    nrows = int(np.ceil(len(masks) / ncols))
+    fig, axes = plt.subplots(nrows, ncols, figsize=(5.5 * ncols, 5.5 * nrows), squeeze=False, layout="constrained")
+    for ax in axes.flat[len(masks):]:
+        ax.set_visible(False)
+
+    corr_tables = {}
+    for ax, (group, mask) in zip(axes.flat, masks.items()):
+        rows = np.flatnonzero(mask)
+        if len(rows) > max_rows:
+            rows = rng.choice(rows, max_rows, replace=False)
+        #Pull out only the sampled rows, without copying the full columns first
+        sample = pd.DataFrame({col: nodes[col].to_numpy()[rows] for col in cols})
+        corr = sample.corr(method="spearman")
+        corr_tables[group] = corr
+
+        image = ax.imshow(corr, cmap="RdBu_r", vmin=-1, vmax=1)
+        ax.set_xticks(range(len(cols)), cols, rotation=45, ha="right")
+        ax.set_yticks(range(len(cols)), cols)
+        #Write each coefficient in its cell, white on the darkest colors so it stays readable
+        for i in range(len(cols)):
+            for j in range(len(cols)):
+                value = corr.iloc[i, j]
+                ax.text(j, i, f"{value:.2f}", ha="center", va="center", fontsize=8,
+                        color="white" if abs(value) > 0.6 else "black")
+        ax.set_title(group, fontsize=10)
+
+    fig.colorbar(image, ax=list(axes.flat[:len(masks)]), shrink=0.8, label="Spearman correlation")
+    fig.suptitle(f"Correlations between attributes {by_text}")
+    plt.show()
+
+    return pd.concat(corr_tables, names=["group", "attribute"])
