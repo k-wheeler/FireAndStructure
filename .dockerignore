@@ -1,0 +1,7 @@
+# Keep the large data files and local clutter out of the image build
+Data/
+.git/
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+.DS_Store
