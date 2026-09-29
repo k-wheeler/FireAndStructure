@@ -1,2 +1,6 @@
 # Large data files
 Data/
+
+# Jupyter and Python caches
+.ipynb_checkpoints/
+__pycache__/

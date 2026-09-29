@@ -73,9 +73,18 @@ Notes:
 
 ## Running the notebook
 
-1. Download the manual datasets listed under [Data](#data) into a `Data/` folder in the repository. The notebook uses `ca_vpdc_nodes.parquet` and `ca_vpdc_edges_0_10.parquet` from the structure graph, `RDS-2025-0006.zip` from Riley et al. (2025), and the Open Climate Risk county GeoJSON files.
+1. Download the manual datasets into a `Data/` folder in the repository (about 6.1 GB in total):
+
+   | File | Size | Source |
+   |---|---|---|
+   | `ca_vpdc_nodes.parquet` | 2.4 GB | Vibrant Planet [dataset page](https://www.vpdatacommons.org/datasets/ca-stucture-graph-data) |
+   | `ca_vpdc_edges_0_10.parquet` | 1.8 GB | Vibrant Planet [dataset page](https://www.vpdatacommons.org/datasets/ca-stucture-graph-data) |
+   | `RDS-2025-0006.zip` | 1.7 GB | Riley et al. (2025) [archive page](https://www.fs.usda.gov/rds/archive/catalog/RDS-2025-0006) |
+   | `Mariposa-County-06043.geojson`, `Shasta-County-06089.geojson`, `Sacramento-County-06067.geojson` | 6 MB, 30 MB, 141 MB | [Open Climate Risk](#open-climate-risk-county-downloads) |
+
+   Only these two structure graph files are needed; the full structure graph dataset (all edge files) is over 30 GB.
 2. Run the notebook from top to bottom. Later sections depend on variables created earlier (for example `points`, `counties`, and `nodes_filtered2`).
-3. The other datasets are downloaded or read remotely the first time the notebook runs and are saved to `Data/` so later runs are faster: `ca_counties.gpkg`, `ca_ecoregions.gpkg`, `riley2025_BP_2011ClimateRun_CA.tif`, `nodes_filtered_tree_canopy_2025_100m.parquet`, and `ca_county_acs_2024.csv`. Delete a saved file to recalculate it.
+3. The other datasets are downloaded (about 330 MB: county boundaries, ecoregions, and the two ACS tables) or read remotely the first time the notebook runs and are saved to `Data/` so later runs are faster: `ca_counties.gpkg`, `ca_ecoregions.gpkg`, `riley2025_BP_2011ClimateRun_CA.tif`, `nodes_filtered_tree_canopy_2025_100m.parquet`, and `ca_county_acs_2024.csv`. Delete a saved file to recalculate it.
 
 Notes:
 
@@ -89,7 +98,7 @@ The data used in this project are **not included in this repository**. The `Data
 
 | Dataset | Source | License | How to get it |
 |---|---|---|---|
-| California structure graph (building nodes and edges) | Vibrant Planet Data Commons | CC BY-NC-SA 4.0 | Download manually from the [dataset page](https://www.vpdatacommons.org/datasets/ca-stucture-graph-data) |
+| California structure graph (building nodes and edges) | Vibrant Planet Data Commons | CC BY-NC-SA 4.0 | Download `ca_vpdc_nodes.parquet` and `ca_vpdc_edges_0_10.parquet` manually from the [dataset page](https://www.vpdatacommons.org/datasets/ca-stucture-graph-data) |
 | Wildfire risk components (burn probability, flame length probability) | Riley et al. 2025, USDA Forest Service Research Data Archive | Public domain | Download `RDS-2025-0006.zip` manually from the [archive page](https://www.fs.usda.gov/rds/archive/catalog/RDS-2025-0006) |
 | Open Climate Risk building-level risk (per county) | CarbonPlan | ODbL (building-level data) | Download manually for each county from the [Open Climate Risk map](https://carbonplan.org/research/climate-risk?lat=38.49787&lng=-121.38365&zoom=9.58) (see below) |
 | County boundaries (2023 TIGER/Line) | U.S. Census Bureau | Public domain | Downloaded by the notebook |
