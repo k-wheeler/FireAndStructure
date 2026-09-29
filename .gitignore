@@ -4,3 +4,6 @@ Data/
 # Jupyter and Python caches
 .ipynb_checkpoints/
 __pycache__/
+
+# Exported copy of the notebook
+Data_Exploration.pdf
