@@ -27,13 +27,17 @@ These are first-pass results; see the notebook for details and caveats.
 | [`node_summaries.py`](node_summaries.py) | `summarize_nodes()`: summary tables, histograms, and correlation matrices of building attributes, overall or by a grouping such as county or ecoregion |
 | [`landcover.py`](landcover.py) | `mean_tree_canopy()` (and `nlcd_cover_fractions()`): summarize land cover rasters in a neighborhood around each building, reading the raster in strips to limit memory |
 | [`risk_correlations.py`](risk_correlations.py) | `correlate_connectivity_with_risk()`: match a county's Open Climate Risk building points to building footprints and correlate risk with connectivity |
+| [`environment.yml`](environment.yml) | Conda environment with the package versions used |
+| [`Dockerfile`](Dockerfile) | Builds a Docker image with the environment, notebook, and helper modules (see [Docker](#docker)) |
 
 ## Setup
 
-The code uses Python 3.12 with packages from conda-forge:
+The code uses Python 3.12 with packages from conda-forge, listed with their versions in [`environment.yml`](environment.yml). You can set it up with conda or run it in Docker.
+
+### Conda
 
 ```bash
-conda create -n firestructure -c conda-forge --strict-channel-priority python=3.12 geopandas pandas numpy pyarrow rasterio scipy shapely matplotlib notebook ipykernel
+conda env create -f environment.yml
 conda activate firestructure
 ```
 
@@ -42,6 +46,30 @@ Then start Jupyter from the repository folder and open `Data_Exploration.ipynb`:
 ```bash
 jupyter notebook
 ```
+
+### Docker
+
+The [`Dockerfile`](Dockerfile) builds an image with the same environment, the notebook, and the helper modules. The data are not included in the image; your local `Data/` folder is attached when the container runs.
+
+Build the image from the repository folder:
+
+```bash
+docker build -t firestructure .
+```
+
+Run it, attaching your `Data/` folder:
+
+```bash
+docker run --rm -p 8888:8888 -v "$PWD/Data:/home/mambauser/FireAndStructure/Data" firestructure
+```
+
+Then open the `http://127.0.0.1:8888/tree?token=...` link printed in the terminal.
+
+Notes:
+
+- Files the notebook saves to `Data/` are kept on your computer. Edits to the notebook itself are lost when the container stops, because the notebook is copied into the image. To keep your edits, attach the whole repository folder instead: `-v "$PWD:/home/mambauser/FireAndStructure"`.
+- Rebuild the image after changing the notebook or the `.py` files so the image has the latest versions.
+- The full notebook needs more memory than Docker Desktop's default. Increase it under Docker Desktop → Settings → Resources → Memory (for example, to 12–14 GB).
 
 ## Running the notebook
 
